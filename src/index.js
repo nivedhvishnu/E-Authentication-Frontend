@@ -1,17 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { LocaleProvider } from "antd";
+import { Provider } from "react-redux";
+import configureStore from "./redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import Routes from "./components/Routes";
+import 'antd/dist/antd.css';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+  // <LocaleProvider >
+  <Provider store={configureStore.store}>
+    <PersistGate loading={null} persistor={configureStore.persistor}>
+      <Routes />
+    </PersistGate>
+  </Provider>, document.getElementById('root')
+  //</LocaleProvider> 
+)
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
