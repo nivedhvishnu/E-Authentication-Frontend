@@ -35,6 +35,7 @@ class LoginComponent extends Component {
   render() {
     return (
       <LoginWrapper>
+          <h2 style={{display:"flex",position:"absolute",top:"25%",left:"42%"}}>E Authentication Login</h2>
         <div className="login-component" >
           <Form
             onFinish={this.handleSubmit}

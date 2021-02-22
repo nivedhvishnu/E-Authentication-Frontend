@@ -1,15 +1,26 @@
 import React, { Component } from "react";
 import { Form, Input, Select, Button, Row, Col } from "antd";
-import ClientWrapper from "./Register.style";
+import ClientWrapper from "./Client.style";
 import { connect } from "react-redux";
-import { addClient, updateClient } from "./RegisterAction";
+import {
+  addClient,
+  updateClient,
+  setEditClient,
+  fetchServices,
+  fetchInvoices,
+} from "./ClientsAction";
 import {history} from "../../history";
-import axios from "axios";
-import config from "../../config/api";
 
-class Register extends Component {
+class ClientForm extends Component {
+  componentDidMount() {
+    this.props.fetchServices();
+    this.props.fetchInvoices();
+  }
+  componentWillUnmount() {
+    this.props.setEditClient([]);
+  }
+
   handleSubmit = (values) => {
-    console.log("VALUES", values);
     let data = {
       name: values.client_name,
       company: values.client_company,
@@ -19,33 +30,28 @@ class Register extends Component {
       created_by: this.props.LOGINREDUCER.USER.id,
     };
     if (this.props.edit) {
+      console.log(data)
       this.props.updateClient(data);
     } else {
       this.props.addClient(data);
     }
-    console.log("Data", data);
   };
-
-  handleLogout=()=>{
-    console.log(this.props.LOGINREDUCER.USER)
-    axios.get(`${config.api.base_url}api/logout`, {params:{id:this.props.LOGINREDUCER.USER.reset_token}}).then(response => {
-      if (response.status == 200) {
-        history.push("/");
-      }
-    })
-  }
+  handleCancel = () => {
+    history.push("/clients/view");
+    this.props.setEditClient([]);
+  };
   render() {
-    console.log(this.props.edit, "EDIT");
     return (
       <ClientWrapper>
         <div className="form-container">
-          <h1 style={{display:'flex',justifyContent:"center"}}>Add Client To Login</h1>
+        {this.props.edit?<h1 style={{display:'flex',justifyContent:"center"}}>Clients Edit Page</h1>:<h1 style={{display:'flex',justifyContent:"center"}}>Clients Register Page</h1>}
           <Form onFinish={this.handleSubmit}>
             <Row>
               <Col span={11}>
                 <Form.Item
                   label="Client Name"
                   name="client_name"
+                  initialValue={this.props.CLIENTREDUCER.EDITCLIENTDATA.name}
                   rules={[
                     {
                       required: true,
@@ -60,6 +66,7 @@ class Register extends Component {
                 <Form.Item
                   label="Client Company"
                   name="client_company"
+                  initialValue={this.props.CLIENTREDUCER.EDITCLIENTDATA.company}
                   rules={[
                     {
                       required: true,
@@ -76,6 +83,7 @@ class Register extends Component {
                 <Form.Item
                   label="Client Email"
                   name="client_email"
+                  initialValue={this.props.CLIENTREDUCER.EDITCLIENTDATA.email}
                   rules={[
                     {
                       required: true,
@@ -90,6 +98,7 @@ class Register extends Component {
                 <Form.Item
                   label="Client Username"
                   name="client_contact"
+                  initialValue={this.props.CLIENTREDUCER.EDITCLIENTDATA.username}
                   rules={[
                     {
                       required: true,
@@ -98,12 +107,12 @@ class Register extends Component {
                   ]}
                 >
                   <Input
-                    placeholder="Please input your Client Contact Username!"
+                    placeholder="Please input your Client Username!"
                   />
                 </Form.Item>
               </Col>
             </Row>
-            <Row>
+            {!this.props.edit?<Row>
               <Col span={11}>
                 <Form.Item
                   label="Client Password"
@@ -115,14 +124,21 @@ class Register extends Component {
                     },
                   ]}
                 >
-                  <Input.Password placeholder="Please Enter Clients Password"/>
+                   <Input.Password placeholder="Please Enter Clients Password"/>
                 </Form.Item>
               </Col>
-            </Row>
+            </Row>:null}
             {this.props.edit ? (
               <Form.Item wrapperCol={{ span: 22, offset: 15 }}>
                 <Button type="primary" htmlType="submit">
                   Edit Client
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="cancel"
+                  onClick={this.handleCancel}
+                >
+                  Cancel
                 </Button>
               </Form.Item>
             ) : (
@@ -130,11 +146,15 @@ class Register extends Component {
                 <Button type="primary" htmlType="submit">
                   Add Client
                 </Button>
+                <Button
+                  type="primary"
+                  htmlType="cancel"
+                  onClick={this.handleCancel}
+                >
+                  Cancel
+                </Button>
               </Form.Item>
             )}
-            <Button type="primary" onClick={this.handleLogout}>
-              Log Out
-            </Button>
           </Form>
         </div>
       </ClientWrapper>
@@ -149,6 +169,9 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   addClient,
   updateClient,
+  setEditClient,
+  fetchServices,
+  fetchInvoices,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Register);
+export default connect(mapStateToProps, mapDispatchToProps)(ClientForm);
